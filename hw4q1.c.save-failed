@@ -1,0 +1,92 @@
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_WORD_LEN 32
+#define N_NOUNS 6
+#define N_VERBS 5
+#define N_ADJS 6
+
+
+bool is_suffix_in_dict(char *str, char *dict[], int n);
+int StringLength(char *str);
+void ConvertToLowercase(char *string);
+//void RemoveNonLetters(char *string_ptr, char *new_string_ptr);
+void CopyString(char* source, char* destination);
+
+int main()
+{
+    /*char *noun_suffixes[] = {"msi", "re", "sci", "ssen", "tnem", "tsi"};
+    char *verb_suffixes[] = {"de", "eta", "ezi", "gni", "yfi"};
+    char *adj_suffixes[] = {"elba", "evi", "hsi", "la", "luf", "suo"};*/
+
+
+    char *original_str = NULL;
+
+    original_str = "!This is a !!! 122112 TEST!.";
+
+    ConvertToLowercase(original_str);
+    printf("%d\n", StringLength(original_str));
+
+    printf("%s", original_str);
+
+    return 0;
+}
+
+
+int StringLength(char *string_ptr) {
+    int length = 0;
+    while (*string_ptr != '\0') {
+        length++;
+        string_ptr++;
+    }
+
+    return length;
+}
+
+void ConvertToLowercase(char *string) {
+    for (; *string != 0; string++) {
+        if (*string > 'A' && *string < 'Z') {
+            *string = *string + ('a' - 'Z');
+        }
+        printf("%c", *string);
+    }
+}
+
+/*void RemoveNonLetters(char *string_ptr, char *new_string_ptr) {
+    while (*string_ptr != '\0') {
+        if (*string_ptr > 'a' && *string_ptr < 'z') {
+            *new_string_ptr = *string_ptr;
+        } else if (*string_ptr > 'A' && *string_ptr < 'Z') {
+            *new_string_ptr = *string_ptr;
+        } else if (*string_ptr == ' ' || *string_ptr == '.') {
+            *new_string_ptr = *string_ptr;
+        }
+
+    string_ptr++;
+    new_string_ptr++;
+    }
+}*/
+
+void CopyString(char *source, char *destination) {
+    if (source != NULL && destination != NULL) {
+        while (*source != '\0') {
+            *(destination++) = *(source++);
+        }
+    }
+}
+
+
+/*int ConvertToLowercase(char *string, int len) {
+    for
+}
+
+int StringCompare(char *string_1, char *string_2) {
+    int compare_value;
+
+    while(*string_1 == *string_2) {
+        string_1++;
+        string_2++;
+        if ()
+    }
+}*/

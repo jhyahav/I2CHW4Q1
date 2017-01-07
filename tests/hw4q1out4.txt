@@ -1,0 +1,13 @@
+Enter image dimensions:
+Enter image:
+Enter sliding window dimensions:
+Integral image is:
+40 96 108 133 169
+117 185 235 414 478
+327 575 755 1134 1287
+542 974 1279 1787 1954
+Smoothed image is:
+40 56 12 25 36
+77 12 38 154 28
+210 180 130 200 89
+215 184 125 129 14

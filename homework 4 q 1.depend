@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1483817006 source:c:\users\jonathan\dropbox\c projects\homework 4\i2chw4q1\hw4q1.c
+	<stdio.h>
+	<stdbool.h>
+	<string.h>
+
