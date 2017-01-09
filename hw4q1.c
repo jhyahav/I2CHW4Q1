@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define MAX_WORD_LEN 32
 #define N_NOUNS 6
@@ -8,36 +9,48 @@
 #define N_ADJS 6
 #define N_SUFFIXES (N_NOUNS + N_VERBS + N_ADJS)
 
-bool IsSuffixInDict(char *str, char *dict[], int n);
+bool is_suffix_in_dict(char *str, char *dict[], int n);
 int StringLength(char *str);
-void ConvertToLowercase(char *string);
+void SelfConvertToLowercase(char *string);
+void ConvertToLowercase(char *string, char *lowercase_str);
 void RemoveNonLetters(char *string_ptr);
 void CopyString(char *source, char *destination);
 void DeleteChar(char *string);
 int WordCompare(char *flipped_word, char *suffix);
 void MergeSuffixLists(char *list_1[], int len_1, char *list_2[], int len_2, char *merged_list[]);
 void FlipString(char *orig_str, char *flipped_str, int str_len);
+void ReadWord(char *noun_suffixes[], int noun_suffixes_len,
+                char *verb_suffixes[], int verb_suffixes_len,
+                char *adj_suffixes[], int adj_suffixes_len,
+                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs);
 
 int main()
 {
     char *noun_suffixes[] = {"msi", "re", "sci", "ssen", "tnem", "tsi"};
-    //char *verb_suffixes[] = {"de", "eta", "ezi", "gni", "yfi"};
-    //char *adj_suffixes[] = {"elba", "evi", "hsi", "la", "luf", "suo"};
+    char *verb_suffixes[] = {"de", "eta", "ezi", "gni", "yfi"};
+    char *adj_suffixes[] = {"elba", "evi", "hsi", "la", "luf", "suo"};
 
-    char word[MAX_WORD_LEN + 1], flipped_word[MAX_WORD_LEN + 1];
-    scanf("%s", word);
+    ///necessary?
+    int noun_dict_len = N_NOUNS, verb_dict_len = N_VERBS, adj_dict_len = N_ADJS;
 
+    int num_of_nouns = 0, num_of_verbs = 0, num_of_adjs = 0;
+
+    int *num_nouns_ptr = &num_of_nouns;
+    int *num_verbs_ptr = &num_of_verbs;
+    int *num_adjs_ptr = &num_of_adjs;
     //int word_len = StringLength(word);
 
-    ConvertToLowercase(word);
-    RemoveNonLetters(word);
-    FlipString(word, flipped_word, StringLength(word));
+    //SelfConvertToLowercase(word);
+    //RemoveNonLetters(word);
+    //FlipString(word, flipped_word, StringLength(word));
 
-    printf("%s\n", flipped_word);
+    //int ret = is_suffix_in_dict(flipped_word, noun_suffixes, N_NOUNS);
 
-    int ret = IsSuffixInDict(flipped_word, noun_suffixes, 1);
+    //printf("%d\n", ret);
 
-    printf("%d\n", ret);
+    ReadWord(noun_suffixes, noun_dict_len, verb_suffixes, verb_dict_len,
+             adj_suffixes, adj_dict_len, num_nouns_ptr, num_verbs_ptr,
+             num_adjs_ptr);
 
     return 0;
 }
@@ -52,7 +65,7 @@ int StringLength(char *string_ptr) {
     return length;
 }
 
-void ConvertToLowercase(char *string) {
+void SelfConvertToLowercase(char *string) {
     while (*string != '\0') {
         if (*string >= 'A' && *string <= 'Z') {
             char temp = *string;
@@ -83,6 +96,9 @@ void DeleteChar(char *string) {
 
 void FlipString(char *orig_str, char *flipped_str, int str_len) {
     for (int i = str_len; i > 0; i--) {
+       /* if (*(orig_str + i - 1) == '.') {
+            *(flipped_str + str_len - 1)
+        }*/
         *(flipped_str + (str_len - i)) = *(orig_str + i - 1);
     }
     *(flipped_str + str_len) = '\0';
@@ -122,29 +138,35 @@ void MergeSuffixLists(char *list_1[], int len_1, char *list_2[], int len_2, char
 
 
 int WordCompare(char *flipped_word, char *suffix) {
-    RemoveNonLetters(flipped_word);
-    RemoveNonLetters(suffix);
 
+    char processed_suffix[MAX_WORD_LEN + 1];
+    ///Change to own implementation
+    strcpy(processed_suffix, suffix);
+    SelfConvertToLowercase(processed_suffix);
+    RemoveNonLetters(processed_suffix);
+    /*printf("%s\n", processed_suffix);
+    printf("%s\n", flipped_word);*/
+    char *suf_ptr = processed_suffix;
 
     while (*flipped_word != '\0') {
-        if (*suffix == '\0') {
+        if (*suf_ptr == '\0') {
             return 2;
         }
 
-        if (*flipped_word > *suffix) {
+        if (*flipped_word > *suf_ptr) {
             return 1;
         }
 
-        if (*suffix > *flipped_word) {
+        if (*suf_ptr > *flipped_word) {
             return -1;
         }
 
         flipped_word++;
-        suffix++;
+        suf_ptr++;
     }
     /*If the while loop ends (i.e., string_1 ends) before suffix ends,
     suffix is greater.*/
-    if (*suffix != '\0') {
+    if (*suf_ptr != '\0') {
         return -2;
     }
 
@@ -152,12 +174,10 @@ int WordCompare(char *flipped_word, char *suffix) {
 }
 
 //N is dict length
-bool IsSuffixInDict(char *str, char *dict[], int n) {
-    n = N_NOUNS;
-    //int str_len = StringLength(str);
+bool is_suffix_in_dict(char *str, char *dict[], int n) {
     int low = 0, high = n, mid, ret;
-
-    while (low <= high) {
+    ///WHY LESS AND NOT LESS/EQUALS?
+    while (low <= high && low < n) {
 
         mid = low + (high - low)/2;
         ret = WordCompare(str, *(dict + mid));
@@ -177,3 +197,40 @@ bool IsSuffixInDict(char *str, char *dict[], int n) {
     return false;
 }
 
+///Error when last three letters are 't' or greater???
+void ReadWord(char *noun_suffixes[], int noun_suffixes_len,
+                char *verb_suffixes[], int verb_suffixes_len,
+                char *adj_suffixes[], int adj_suffixes_len,
+                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs) {
+
+    char word[MAX_WORD_LEN + 1], flipped_word[MAX_WORD_LEN + 1];
+    scanf("%s", word);
+    int str_len = StringLength(word);
+
+    SelfConvertToLowercase(word);
+    RemoveNonLetters(word);
+    FlipString(word, flipped_word, str_len);
+
+    //printf("%s\n", flipped_word);
+
+    if (is_suffix_in_dict(flipped_word, noun_suffixes, noun_suffixes_len)) {
+        *(num_of_nouns) = *(num_of_nouns) + 1;
+    } else if (is_suffix_in_dict(flipped_word, verb_suffixes, verb_suffixes_len)) {
+        *(num_of_verbs) = *(num_of_verbs) + 1;
+    } else if (is_suffix_in_dict(flipped_word, adj_suffixes, adj_suffixes_len)) {
+        *(num_of_adjs) = *(num_of_adjs) + 1;
+    }
+
+    printf("The sentence had %d nouns, %d verbs, and %d adjectives.\n",
+           *num_of_nouns, *num_of_verbs, *num_of_adjs);
+}
+
+/*bool read_sentence(char *noun_suffixes[], int noun_suffixes_len,
+                   char *verb_suffixes[], int verb_suffixes_len,
+                   char *adj_suffixes[], int adj_suffixes_len,
+                   int *num_of_nouns, int *num_of_verbs, int *num_of_adjs) {
+    while (1) {
+        if ()
+    }
+
+}*/
