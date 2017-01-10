@@ -8,6 +8,8 @@
 #define N_VERBS 5
 #define N_ADJS 6
 #define N_SUFFIXES (N_NOUNS + N_VERBS + N_ADJS)
+#define PERIOD 1
+#define ERROR -2
 
 bool is_suffix_in_dict(char *str, char *dict[], int n);
 int StringLength(char *str);
@@ -19,13 +21,15 @@ void DeleteChar(char *string);
 int WordCompare(char *flipped_word, char *suffix);
 void MergeSuffixLists(char *list_1[], int len_1, char *list_2[], int len_2, char *merged_list[]);
 void FlipString(char *orig_str, char *flipped_str, int str_len);
-void ReadWord(char *noun_suffixes[], int noun_suffixes_len,
+int ReadWord(char *noun_suffixes[], int noun_suffixes_len,
                 char *verb_suffixes[], int verb_suffixes_len,
                 char *adj_suffixes[], int adj_suffixes_len,
-                int *num_of_nouns, int *num_of_verbs,
-                int *num_of_adjs, char *word);
-
+                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs);
 bool read_sentence(char *noun_suffixes[], int noun_suffixes_len,
+                   char *verb_suffixes[], int verb_suffixes_len,
+                   char *adj_suffixes[], int adj_suffixes_len,
+                   int *num_of_nouns, int *num_of_verbs, int *num_of_adjs);
+void ReadAllText(char *noun_suffixes[], int noun_suffixes_len,
                    char *verb_suffixes[], int verb_suffixes_len,
                    char *adj_suffixes[], int adj_suffixes_len,
                    int *num_of_nouns, int *num_of_verbs, int *num_of_adjs);
@@ -39,22 +43,13 @@ int main()
     ///necessary?
     int noun_dict_len = N_NOUNS, verb_dict_len = N_VERBS, adj_dict_len = N_ADJS;
 
-    int num_of_nouns, num_of_verbs, num_of_adjs;
+    int num_of_nouns = 0, num_of_verbs = 0, num_of_adjs = 0;
 
     int *num_nouns_ptr = &num_of_nouns;
     int *num_verbs_ptr = &num_of_verbs;
     int *num_adjs_ptr = &num_of_adjs;
-    //int word_len = StringLength(word);
 
-    //SelfConvertToLowercase(word);
-    //RemoveNonLetters(word);
-    //FlipString(word, flipped_word, StringLength(word));
-
-    //int ret = is_suffix_in_dict(flipped_word, noun_suffixes, N_NOUNS);
-
-    //printf("%d\n", ret);
-
-    read_sentence(noun_suffixes, noun_dict_len, verb_suffixes, verb_dict_len,
+    ReadAllText(noun_suffixes, noun_dict_len, verb_suffixes, verb_dict_len,
              adj_suffixes, adj_dict_len, num_nouns_ptr, num_verbs_ptr,
              num_adjs_ptr);
 
@@ -155,6 +150,11 @@ int WordCompare(char *flipped_word, char *suffix) {
     char *suf_ptr = processed_suffix;
 
     while (*flipped_word != '\0') {
+        if (*flipped_word == '.') {
+            flipped_word++;
+        }
+
+
         if (*suf_ptr == '\0') {
             return 2;
         }
@@ -188,9 +188,7 @@ bool is_suffix_in_dict(char *str, char *dict[], int n) {
         mid = low + (high - low)/2;
         ret = WordCompare(str, *(dict + mid));
         if (ret == 0 || ret == 2) {
-            printf("FOUND\n");
             return true;
-
         }
 
         if (ret == 1) {
@@ -206,58 +204,79 @@ bool is_suffix_in_dict(char *str, char *dict[], int n) {
 }
 
 ///Error when last three letters are 't' or greater???
-void ReadWord(char *noun_suffixes[], int noun_suffixes_len,
+int ReadWord(char *noun_suffixes[], int noun_suffixes_len,
                 char *verb_suffixes[], int verb_suffixes_len,
                 char *adj_suffixes[], int adj_suffixes_len,
-                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs, char *word) {
+                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs) {
 
+    char word[MAX_WORD_LEN + 1], flipped_word[MAX_WORD_LEN + 1];
+    int scanf_ret_val = scanf("%s", word);
+    if (scanf_ret_val == EOF) {
+        return EOF;
+    }
 
-    *(num_of_nouns) = *(num_of_verbs) = *(num_of_adjs) = 0;
+    if (scanf_ret_val != 1) {
+        return ERROR;
+    }
 
-    char flipped_word[MAX_WORD_LEN + 1];
     SelfConvertToLowercase(word);
-    printf("%s\n", word);
     RemoveNonLetters(word);
-
     int str_len = StringLength(word);
-    printf("%s\n", word);
 
     FlipString(word, flipped_word, str_len);
 
-    printf("%s\n", flipped_word);
-
-    printf("NUMBER OF NOUNS: %d\n", *num_of_nouns);
-    printf("NUMBER OF VERBS: %d\n", *num_of_verbs);
+    ///printf("%s\n", flipped_word);
 
     if (is_suffix_in_dict(flipped_word, noun_suffixes, noun_suffixes_len)) {
         *(num_of_nouns) = *(num_of_nouns) + 1;
-        printf("NUMBER OF NOUNS: %d\n", *num_of_nouns);
-        printf("NUMBER OF VERBS: %d\n", *num_of_verbs);
     } else if (is_suffix_in_dict(flipped_word, verb_suffixes, verb_suffixes_len)) {
         *(num_of_verbs) = *(num_of_verbs) + 1;
     } else if (is_suffix_in_dict(flipped_word, adj_suffixes, adj_suffixes_len)) {
         *(num_of_adjs) = *(num_of_adjs) + 1;
     }
 
-    printf("The sentence had %d nouns, %d verbs, and %d adjectives.\n",
-           *num_of_nouns, *num_of_verbs, *num_of_adjs);
+    if (*flipped_word == '.') {
+        return PERIOD;
+    }
+
+    return 0;
 }
 
 bool read_sentence(char *noun_suffixes[], int noun_suffixes_len,
                    char *verb_suffixes[], int verb_suffixes_len,
                    char *adj_suffixes[], int adj_suffixes_len,
                    int *num_of_nouns, int *num_of_verbs, int *num_of_adjs) {
-
-    char word[MAX_WORD_LEN + 1];
-
     while (1) {
-        scanf("%s", word);
-        ReadWord(noun_suffixes, noun_suffixes_len, verb_suffixes,
+        int ret = ReadWord(noun_suffixes, noun_suffixes_len, verb_suffixes,
                  verb_suffixes_len, adj_suffixes, adj_suffixes_len,
-                 num_of_nouns, num_of_nouns, num_of_adjs, word);
+                 num_of_nouns, num_of_verbs, num_of_adjs);
+
+        if (ret == PERIOD) {
+            printf("The sentence had %d nouns, %d verbs and %d adjectives.\n",
+           *num_of_nouns, *num_of_verbs, *num_of_adjs);
+           *num_of_nouns = *num_of_verbs = *num_of_adjs = 0;
+           return true;
+        }
+
+        if (ret == EOF || ret == ERROR) {
+            printf("The sentence had %d nouns, %d verbs and %d adjectives.\n",
+           *num_of_nouns, *num_of_verbs, *num_of_adjs);
+           return false;
+        }
     }
 
-    printf("The sentence had %d nouns, %d verbs, and %d adjectives.\n",
-           *num_of_nouns, *num_of_verbs, *num_of_adjs);
+}
 
+void ReadAllText(char *noun_suffixes[], int noun_suffixes_len,
+                   char *verb_suffixes[], int verb_suffixes_len,
+                   char *adj_suffixes[], int adj_suffixes_len,
+                   int *num_of_nouns, int *num_of_verbs, int *num_of_adjs) {
+    printf("Enter text to analyze:\n");
+    bool EOF_not_reached = true;
+    while (EOF_not_reached) {
+        EOF_not_reached = read_sentence(noun_suffixes, noun_suffixes_len,
+                    verb_suffixes, verb_suffixes_len, adj_suffixes,
+                    adj_suffixes_len, num_of_nouns, num_of_verbs,
+                    num_of_adjs);
+    }
 }
