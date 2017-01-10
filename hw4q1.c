@@ -22,7 +22,13 @@ void FlipString(char *orig_str, char *flipped_str, int str_len);
 void ReadWord(char *noun_suffixes[], int noun_suffixes_len,
                 char *verb_suffixes[], int verb_suffixes_len,
                 char *adj_suffixes[], int adj_suffixes_len,
-                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs);
+                int *num_of_nouns, int *num_of_verbs,
+                int *num_of_adjs, char *word);
+
+bool read_sentence(char *noun_suffixes[], int noun_suffixes_len,
+                   char *verb_suffixes[], int verb_suffixes_len,
+                   char *adj_suffixes[], int adj_suffixes_len,
+                   int *num_of_nouns, int *num_of_verbs, int *num_of_adjs);
 
 int main()
 {
@@ -33,7 +39,7 @@ int main()
     ///necessary?
     int noun_dict_len = N_NOUNS, verb_dict_len = N_VERBS, adj_dict_len = N_ADJS;
 
-    int num_of_nouns = 0, num_of_verbs = 0, num_of_adjs = 0;
+    int num_of_nouns, num_of_verbs, num_of_adjs;
 
     int *num_nouns_ptr = &num_of_nouns;
     int *num_verbs_ptr = &num_of_verbs;
@@ -48,7 +54,7 @@ int main()
 
     //printf("%d\n", ret);
 
-    ReadWord(noun_suffixes, noun_dict_len, verb_suffixes, verb_dict_len,
+    read_sentence(noun_suffixes, noun_dict_len, verb_suffixes, verb_dict_len,
              adj_suffixes, adj_dict_len, num_nouns_ptr, num_verbs_ptr,
              num_adjs_ptr);
 
@@ -182,7 +188,9 @@ bool is_suffix_in_dict(char *str, char *dict[], int n) {
         mid = low + (high - low)/2;
         ret = WordCompare(str, *(dict + mid));
         if (ret == 0 || ret == 2) {
+            printf("FOUND\n");
             return true;
+
         }
 
         if (ret == 1) {
@@ -201,20 +209,30 @@ bool is_suffix_in_dict(char *str, char *dict[], int n) {
 void ReadWord(char *noun_suffixes[], int noun_suffixes_len,
                 char *verb_suffixes[], int verb_suffixes_len,
                 char *adj_suffixes[], int adj_suffixes_len,
-                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs) {
+                int *num_of_nouns, int *num_of_verbs, int *num_of_adjs, char *word) {
 
-    char word[MAX_WORD_LEN + 1], flipped_word[MAX_WORD_LEN + 1];
-    scanf("%s", word);
-    int str_len = StringLength(word);
 
+    *(num_of_nouns) = *(num_of_verbs) = *(num_of_adjs) = 0;
+
+    char flipped_word[MAX_WORD_LEN + 1];
     SelfConvertToLowercase(word);
+    printf("%s\n", word);
     RemoveNonLetters(word);
+
+    int str_len = StringLength(word);
+    printf("%s\n", word);
+
     FlipString(word, flipped_word, str_len);
 
-    //printf("%s\n", flipped_word);
+    printf("%s\n", flipped_word);
+
+    printf("NUMBER OF NOUNS: %d\n", *num_of_nouns);
+    printf("NUMBER OF VERBS: %d\n", *num_of_verbs);
 
     if (is_suffix_in_dict(flipped_word, noun_suffixes, noun_suffixes_len)) {
         *(num_of_nouns) = *(num_of_nouns) + 1;
+        printf("NUMBER OF NOUNS: %d\n", *num_of_nouns);
+        printf("NUMBER OF VERBS: %d\n", *num_of_verbs);
     } else if (is_suffix_in_dict(flipped_word, verb_suffixes, verb_suffixes_len)) {
         *(num_of_verbs) = *(num_of_verbs) + 1;
     } else if (is_suffix_in_dict(flipped_word, adj_suffixes, adj_suffixes_len)) {
@@ -225,12 +243,21 @@ void ReadWord(char *noun_suffixes[], int noun_suffixes_len,
            *num_of_nouns, *num_of_verbs, *num_of_adjs);
 }
 
-/*bool read_sentence(char *noun_suffixes[], int noun_suffixes_len,
+bool read_sentence(char *noun_suffixes[], int noun_suffixes_len,
                    char *verb_suffixes[], int verb_suffixes_len,
                    char *adj_suffixes[], int adj_suffixes_len,
                    int *num_of_nouns, int *num_of_verbs, int *num_of_adjs) {
+
+    char word[MAX_WORD_LEN + 1];
+
     while (1) {
-        if ()
+        scanf("%s", word);
+        ReadWord(noun_suffixes, noun_suffixes_len, verb_suffixes,
+                 verb_suffixes_len, adj_suffixes, adj_suffixes_len,
+                 num_of_nouns, num_of_nouns, num_of_adjs, word);
     }
 
-}*/
+    printf("The sentence had %d nouns, %d verbs, and %d adjectives.\n",
+           *num_of_nouns, *num_of_verbs, *num_of_adjs);
+
+}
