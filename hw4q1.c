@@ -19,7 +19,6 @@ int main()
     int image[N][M] = {{0}}, integral_image[N][M] = {{0}};
     int average[N][M] = {{0}};
     int n, m, h, w;
-    int rect[4] = {0, 0, 3, 3};
 
     printf("Enter image dimensions:\n");
     scanf("%d %d", &n, &m);
@@ -54,16 +53,12 @@ int main()
     printf("Smoothed image is:\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
-            printf("%d  ", average[i][j]);
+            printf("%d ", average[i][j]);
             if (j == m - 1) {
                 printf("\n");
             }
         }
     }
-
-    int rect_sum = sum_rect(integral_image, rect);
-
-    printf("Rect sum: %d\n", rect_sum);
 
     return 0;
 }
@@ -113,7 +108,7 @@ void PrintIntegralImage(int integral_image[][M], int n, int m)
         }
     }
 }
-//Remember to add exceptions for out of bounds bottom and right.
+//Remember to add exceptions for out of bounds bottom and right(?)
 int sum_rect(int integral_image[][M], int rect[4])
 {
     int i_top = rect[0], i_bottom = rect[2];
@@ -166,10 +161,15 @@ void sliding_average(int image[][M], int n, int m, int h, int w,
         for (int j = 0; j < m; j++)
         {
             rect[0] = i - (h/2);
-            printf("Rect 1: %d\n");
             rect[1] = j - (w/2);
             rect[2] = i + (h/2);
+            if (rect[2] >= n) {
+                rect[2] = n - 1;
+            }
             rect[3] = j + (w/2);
+            if (rect[3] >= m) {
+                rect[3] = m - 1;
+            }
 
             sum = sum_rect(integral_image, rect);
 
