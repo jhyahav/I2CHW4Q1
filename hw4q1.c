@@ -17,9 +17,9 @@ void sliding_average(int image[][M], int n, int m, int h, int w,
 int main()
 {
     int image[N][M] = {{0}}, integral_image[N][M] = {{0}};
-    int average[N][M];
-    int n, m;
-    //int rect[4] = {0, 0, 3, 3};
+    int average[N][M] = {{0}};
+    int n, m, h, w;
+    int rect[4] = {0, 0, 3, 3};
 
     printf("Enter image dimensions:\n");
     scanf("%d %d", &n, &m);
@@ -31,7 +31,10 @@ int main()
         }
     }
 
-    printf("Original image is:\n");
+    printf("Enter sliding window dimensions:\n");
+    scanf("%d %d", &h, &w);
+
+    /*printf("Original image is:\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             printf("%d  ", image[i][j]);
@@ -39,17 +42,28 @@ int main()
                 printf("\n");
             }
         }
-    }
+    }*/
 
     compute_integral_image(image, n, m, integral_image);
 
     PrintIntegralImage(integral_image, n, m);
 
+    sliding_average(image, n, m, h, w, average);
 
 
-    //int rect_sum = sum_rect(integral_image, rect);
+    printf("Smoothed image is:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            printf("%d  ", average[i][j]);
+            if (j == m - 1) {
+                printf("\n");
+            }
+        }
+    }
 
-    //printf("Rect sum: %d\n", rect_sum);
+    int rect_sum = sum_rect(integral_image, rect);
+
+    printf("Rect sum: %d\n", rect_sum);
 
     return 0;
 }
@@ -104,8 +118,14 @@ int sum_rect(int integral_image[][M], int rect[4])
 {
     int i_top = rect[0], i_bottom = rect[2];
     int j_left = rect[1], j_right = rect[3];
+
+    //i_bottom = (i_bottom > N) ? i_bottom : N;
+    //j_right = (j_right > M) ? j_right : M;
+
     int integ_img_top_r, integ_img_top_l, integ_img_bottom_l;
     int integ_img_bottom_r = integral_image[i_bottom][j_right];
+
+
     if (i_top < 1) {
         integ_img_top_r = integ_img_top_l = 0;
         integ_img_bottom_l = integral_image[i_bottom][j_left - 1];
@@ -135,5 +155,29 @@ int sum_rect(int integral_image[][M], int rect[4])
 void sliding_average(int image[][M], int n, int m, int h, int w,
                      int average[][M])
 {
+    int rect[4], sum, rounded_avg;
+    double avg;
 
+    int integral_image[N][M] = {{0}};
+    compute_integral_image(image, n, m, integral_image);
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            rect[0] = i - (h/2);
+            printf("Rect 1: %d\n");
+            rect[1] = j - (w/2);
+            rect[2] = i + (h/2);
+            rect[3] = j + (w/2);
+
+            sum = sum_rect(integral_image, rect);
+
+            avg = (double)sum/(h*w);
+
+            rounded_avg = avg + 0.5;
+
+            average[i][j] = rounded_avg;
+        }
+    }
 }
