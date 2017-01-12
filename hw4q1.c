@@ -33,16 +33,6 @@ int main()
     printf("Enter sliding window dimensions:\n");
     scanf("%d %d", &h, &w);
 
-    /*printf("Original image is:\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            printf("%d  ", image[i][j]);
-            if (j == m - 1) {
-                printf("\n");
-            }
-        }
-    }*/
-
     compute_integral_image(image, n, m, integral_image);
 
     PrintIntegralImage(integral_image, n, m);
@@ -125,7 +115,8 @@ int sum_rect(int integral_image[][M], int rect[4])
         integ_img_top_r = integ_img_top_l = 0;
         integ_img_bottom_l = integral_image[i_bottom][j_left - 1];
     }
-    else if (j_left < 1){
+    ///Removed elseif here
+    if (j_left < 1){
         integ_img_top_l = integ_img_bottom_l = 0;
         integ_img_top_r = integral_image[i_top - 1][j_right];
     }
